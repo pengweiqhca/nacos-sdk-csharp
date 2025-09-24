@@ -147,12 +147,12 @@ internal abstract partial class NacosServiceEndpointProviderBase : IServiceEndpo
     /// <inheritdoc/>
     public async ValueTask DisposeAsync()
     {
-        _disposeCancellation.Cancel();
+        await _disposeCancellation.CancelAsync().ConfigureAwait(false);
 
         if (_resolveTask is { } task)
         {
 #pragma warning disable CAC002
-            await task.ConfigureAwait(ConfigureAwaitOptions.SuppressThrowing);
+            await task.ConfigureAwait(ConfigureAwaitOptions.SuppressThrowing | ConfigureAwaitOptions.ContinueOnCapturedContext);
 #pragma warning restore CAC002
         }
     }
