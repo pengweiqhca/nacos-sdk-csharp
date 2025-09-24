@@ -5,7 +5,7 @@
 
     public class IPUtil
     {
-        public static bool PREFER_IPV6_ADDRESSES = Boolean.Parse(Environment.GetEnvironmentVariable("java.net.preferIPv6Addresses"));
+        public static bool PREFER_IPV6_ADDRESSES = bool.Parse(EnvUtil.GetEnvValue("java.net.preferIPv6Addresses"));
 
         public static string IPV6_START_MARK = "[";
 
