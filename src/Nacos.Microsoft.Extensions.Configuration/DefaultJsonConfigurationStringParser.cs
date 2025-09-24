@@ -1,16 +1,15 @@
 ﻿namespace Nacos.Microsoft.Extensions.Configuration
 {
     using global::Microsoft.Extensions.Configuration;
-    using Newtonsoft.Json;
-    using Newtonsoft.Json.Linq;
     using global::System;
     using global::System.Collections.Generic;
-    using global::System.Globalization;
     using global::System.IO;
-    using global::System.Linq;
     using Nacos.V2;
+    using global::System.Text;
+    using global::System.Text.Json;
 
-    internal class DefaultJsonConfigurationStringParser : INacosConfigurationParser
+    #nullable enable
+    internal sealed class DefaultJsonConfigurationStringParser : INacosConfigurationParser
     {
         private DefaultJsonConfigurationStringParser()
         {
@@ -18,105 +17,123 @@
 
         internal static DefaultJsonConfigurationStringParser Instance = new DefaultJsonConfigurationStringParser();
 
-        private readonly IDictionary<string, string> _data = new SortedDictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-        private readonly Stack<string> _context = new Stack<string>();
-        private string _currentPath;
-
-        private JsonTextReader _reader;
-
-        public IDictionary<string, string> Parse(string input)
-            => new DefaultJsonConfigurationStringParser().ParseString(input);
-
-        private IDictionary<string, string> ParseString(string input)
+        public IDictionary<string, string?> Parse(string input)
         {
-            _data.Clear();
-            _reader = new JsonTextReader(new StringReader(input))
-            {
-                DateParseHandling = DateParseHandling.None
-            };
+            using var stream = new MemoryStream(Encoding.UTF8.GetBytes(input));
 
-            var jsonConfig = JObject.Load(_reader);
-
-            VisitJObject(jsonConfig);
-
-            return _data;
+            return new JsonConfigurationFileParser().ParseStream(stream);
         }
 
-        private void VisitJObject(JObject jObject)
+        private sealed class JsonConfigurationFileParser
         {
-            foreach (var property in jObject.Properties())
+            private readonly Dictionary<string, string?> _data = new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase);
+            private readonly Stack<string> _paths = new Stack<string>();
+
+            public Dictionary<string, string?> ParseStream(Stream input)
             {
-                EnterContext(property.Name);
-                VisitProperty(property);
-                ExitContext();
-            }
-        }
+                var jsonDocumentOptions = new JsonDocumentOptions
+                {
+                    CommentHandling = JsonCommentHandling.Skip,
+                    AllowTrailingCommas = true,
+                };
 
-        private void VisitProperty(JProperty property)
-        {
-            VisitToken(property.Value);
-        }
+                using (var reader = new StreamReader(input))
+                using (var doc = JsonDocument.Parse(reader.ReadToEnd(), jsonDocumentOptions))
+                {
+                    if (doc.RootElement.ValueKind != JsonValueKind.Object)
+                    {
+                        throw new FormatException($"Unsupported JSON token '{doc.RootElement.ValueKind}' was found on root element.");
+                    }
 
-        private void VisitToken(JToken token)
-        {
-            switch (token.Type)
-            {
-                case JTokenType.Object:
-                    VisitJObject(token.Value<JObject>());
-                    break;
+                    VisitObjectElement(doc.RootElement);
+                }
 
-                case JTokenType.Array:
-                    VisitArray(token.Value<JArray>());
-                    break;
-
-                case JTokenType.Integer:
-                case JTokenType.Float:
-                case JTokenType.String:
-                case JTokenType.Boolean:
-                case JTokenType.Bytes:
-                case JTokenType.Raw:
-                case JTokenType.Null:
-                    VisitPrimitive(token.Value<JValue>());
-                    break;
-
-                default:
-                    throw new FormatException(
-                        $"Unsupported JSON token '{_reader.TokenType}' was found. Path '{_reader.Path}', line {_reader.LineNumber} position {_reader.LinePosition}.");
-            }
-        }
-
-        private void VisitArray(JArray array)
-        {
-            for (int index = 0; index < array.Count; index++)
-            {
-                EnterContext(index.ToString());
-                VisitToken(array[index]);
-                ExitContext();
-            }
-        }
-
-        private void VisitPrimitive(JValue data)
-        {
-            var key = _currentPath;
-
-            if (_data.ContainsKey(key))
-            {
-                throw new FormatException($"A duplicate key '{key}' was found.");
+                return _data;
             }
 
-            _data[key] = data.ToString(CultureInfo.InvariantCulture);
-        }
+            private void VisitObjectElement(JsonElement element)
+            {
+                var isEmpty = true;
 
-        private void EnterContext(string context)
-        {
-            _context.Push(context);
-            _currentPath = ConfigurationPath.Combine(_context.Reverse());
-        }
+                foreach (var property in element.EnumerateObject())
+                {
+                    isEmpty = false;
+                    EnterContext(property.Name);
+                    VisitValue(property.Value);
+                    ExitContext();
+                }
 
-        private void ExitContext()
-        {
-            _context.Pop();
-            _currentPath = ConfigurationPath.Combine(_context.Reverse());
+                SetNullIfElementIsEmpty(isEmpty);
+            }
+
+            private void VisitArrayElement(JsonElement element)
+            {
+                var index = 0;
+
+                foreach (var arrayElement in element.EnumerateArray())
+                {
+                    EnterContext(index.ToString());
+                    VisitValue(arrayElement);
+                    ExitContext();
+                    index++;
+                }
+
+                SetEmptyIfElementIsEmpty(isEmpty: index == 0);
+            }
+
+            private void SetNullIfElementIsEmpty(bool isEmpty)
+            {
+                if (isEmpty && _paths.Count > 0)
+                {
+                    _data[_paths.Peek()] = null;
+                }
+            }
+
+            private void SetEmptyIfElementIsEmpty(bool isEmpty)
+            {
+                if (isEmpty && _paths.Count > 0)
+                {
+                    _data[_paths.Peek()] = string.Empty;
+                }
+            }
+
+            private void VisitValue(JsonElement value)
+            {
+                switch (value.ValueKind)
+                {
+                    case JsonValueKind.Object:
+                        VisitObjectElement(value);
+                        break;
+
+                    case JsonValueKind.Array:
+                        VisitArrayElement(value);
+                        break;
+
+                    case JsonValueKind.Number:
+                    case JsonValueKind.String:
+                    case JsonValueKind.True:
+                    case JsonValueKind.False:
+                    case JsonValueKind.Null:
+                        var key = _paths.Peek();
+                        if (_data.ContainsKey(key))
+                        {
+                            throw new FormatException($"A duplicate key '{key}' was found.");
+                        }
+
+                        _data[key] = value.ValueKind == JsonValueKind.Null ? null : value.ToString();
+                        break;
+
+                    default:
+                        throw new FormatException($"Unsupported JSON token '{value.ValueKind}' was found.");
+                }
+            }
+
+            private void EnterContext(string context) =>
+                _paths.Push(_paths.Count > 0 ?
+                    _paths.Peek() + ConfigurationPath.KeyDelimiter + context :
+                    context);
+
+            private void ExitContext() => _paths.Pop();
         }
     }
 }
