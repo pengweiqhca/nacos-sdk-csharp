@@ -32,7 +32,7 @@
                 {
                     var clientCertificate = new X509Certificate2(_tlsConfig.PfxFile, _tlsConfig.Password);
 
-#if !NETSTANDARD2_0
+#if NET
                     var httpClientHandler = new SocketsHttpHandler();
                     httpClientHandler.UseProxy = false;
                     httpClientHandler.AllowAutoRedirect = false;

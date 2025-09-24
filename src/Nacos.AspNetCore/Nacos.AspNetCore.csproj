@@ -2,8 +2,8 @@
   <Import Project="../../build/version.props" />
 
   <PropertyGroup>
-    <TargetFrameworks>net6.0;net8.0</TargetFrameworks>
-    <PackageId>nacos-sdk-csharp.AspNetCore</PackageId>
+    <TargetFrameworks>net8.0</TargetFrameworks>
+    <PackageId>nacos-sdk-csharp-unofficial.AspNetCore</PackageId>
     <VersionPrefix>$(NugetVersion)</VersionPrefix>
     <VersionSuffix></VersionSuffix>
     <Authors>nacos-sdk-csharp Contributors</Authors>
@@ -30,11 +30,6 @@
   <ItemGroup>
     <None Include="../../LICENSE" Pack="true" Visible="false" PackagePath="" />
     <None Include="README.md" Pack="true" Visible="false" PackagePath="" />
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(TargetFramework)' == 'net6.0'">
-    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="6.0.0" />
-    <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net8.0'">

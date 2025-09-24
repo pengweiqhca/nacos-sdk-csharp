@@ -73,7 +73,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.Owin.Host.SystemWeb">
-      <Version>4.2.0</Version>
+      <Version>4.2.3</Version>
     </PackageReference>
   </ItemGroup>
   <PropertyGroup>

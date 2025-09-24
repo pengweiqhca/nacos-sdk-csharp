@@ -3,7 +3,7 @@
 
   <PropertyGroup>
     <TargetFramework>net471</TargetFramework>
-    <PackageId>nacos-sdk-csharp.ConfigurationManger</PackageId>
+    <PackageId>nacos-sdk-csharp-unofficial.ConfigurationManger</PackageId>
     <VersionPrefix>$(NugetVersion)</VersionPrefix>
     <VersionSuffix></VersionSuffix>
     <Authors>nacos-sdk-csharp Contributors</Authors>
@@ -13,7 +13,7 @@
     <RepositoryUrl>https://github.com/nacos-group/nacos-sdk-csharp</RepositoryUrl>
     <ProjectUrl>https://github.com/nacos-group/nacos-sdk-csharp</ProjectUrl>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
-    <PackageReadmeFile>README.md</PackageReadmeFile>    
+    <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageReleaseNotes>
     </PackageReleaseNotes>
 
@@ -29,12 +29,7 @@
 
     <ProjectReference Include="..\Nacos\Nacos.csproj" />
 
-    <!-- <PackageReference Include="Grpc.Core" Version="2.34.1" >
-      <PrivateAssets>None</PrivateAssets>
-    </PackageReference> -->
-
-    <PackageReference Include="Microsoft.Configuration.ConfigurationBuilders.Base" Version="2.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Logging" Version="3.1.0" />
+    <PackageReference Include="Microsoft.Configuration.ConfigurationBuilders.Base" Version="3.0.0" />
     <Reference Include="System.Configuration" />
   </ItemGroup>
 

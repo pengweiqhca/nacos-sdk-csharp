@@ -104,27 +104,26 @@
             return builder;
         }
 
-#if NET5_0_OR_GREATER
         /// <summary>
         /// Use nacos config combine IWebHostBuilder and ConfigureAppConfiguration
         /// </summary>
         /// <param name="builder">host builder.</param>
         /// <param name="section">basic nacos configuration section.</param>
+        /// <param name="client">The nacos config client</param>
+        /// <param name="loggerFactory">The loggerFactory</param>
         /// <param name="parser">The parser.</param>
         /// <param name="logAction">The logAction.</param>
         /// <returns>IHostBuilder</returns>
-        public static AspNetCore.Hosting.IWebHostBuilder UseNacosConfig(this AspNetCore.Hosting.IWebHostBuilder builder, string section, INacosConfigurationParser parser = null, Action<ILoggingBuilder> logAction = null)
+        public static IHostApplicationBuilder AddNacosV2Configuration(this IHostApplicationBuilder builder, string section,
+            INacosConfigService client = null,
+            ILoggerFactory loggerFactory = null,
+            INacosConfigurationParser parser = null,
+            Action<ILoggingBuilder> logAction = null)
         {
-            builder.ConfigureAppConfiguration((_, cfb) =>
-            {
-                var config = cfb.Build();
-
-                cfb.AddNacosV2Configuration(config.GetSection(section), parser: parser, logAction: logAction);
-            });
+            builder.Configuration.AddNacosV2Configuration(builder.Configuration.GetSection(section), client, loggerFactory, parser, logAction);
 
             return builder;
         }
-#endif
 
         private static void BuildDISource(
             NacosV2ConfigurationSource source,
