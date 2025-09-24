@@ -34,8 +34,8 @@
                 ? _worker.AddTenantListeners(dataId, group, new List<IListener> { listener })
                 : _worker.AddTenantListeners(dataId, group, tenant, new List<IListener> { listener });
 
-        public async Task<string> GetConfig(string dataId, string group, long timeoutMs)
-            => await GetConfigInner(_namespace, dataId, group, timeoutMs).ConfigureAwait(false);
+        public Task<string> GetConfig(string dataId, string group, long timeoutMs)
+            => GetConfigInner(_namespace, dataId, group, timeoutMs);
 
         public Task<string> GetConfig(string dataId, string group, string tenant, long timeoutMs)
             => GetConfigInner(tenant.IsNullOrWhiteSpace() ? _namespace : tenant, dataId, group, timeoutMs);
@@ -50,20 +50,20 @@
 
         public Task<string> GetServerStatus() => Task.FromResult(_worker.IsHealthServer() ? "UP" : "DOWN");
 
-        public async Task<bool> PublishConfig(string dataId, string group, string content)
-            => await PublishConfig(dataId, group, content, "text").ConfigureAwait(false);
+        public Task<bool> PublishConfig(string dataId, string group, string content)
+            => PublishConfig(dataId, group, content, "text");
 
-        public async Task<bool> PublishConfig(string dataId, string group, string content, string type)
-            => await PublishConfigInner(_namespace, dataId, group, null, null, null, content, type, null).ConfigureAwait(false);
+        public Task<bool> PublishConfig(string dataId, string group, string content, string type)
+            => PublishConfigInner(_namespace, dataId, group, null, null, null, content, type, null);
 
-        public async Task<bool> PublishConfigCas(string dataId, string group, string content, string casMd5)
-            => await PublishConfigInner(_namespace, dataId, group, null, null, null, content, "text", casMd5).ConfigureAwait(false);
+        public Task<bool> PublishConfigCas(string dataId, string group, string content, string casMd5)
+            => PublishConfigInner(_namespace, dataId, group, null, null, null, content, "text", casMd5);
 
-        public async Task<bool> PublishConfigCas(string dataId, string group, string content, string casMd5, string type)
-            => await PublishConfigInner(_namespace, dataId, group, null, null, null, content, type, casMd5).ConfigureAwait(false);
+        public Task<bool> PublishConfigCas(string dataId, string group, string content, string casMd5, string type)
+            => PublishConfigInner(_namespace, dataId, group, null, null, null, content, type, casMd5);
 
-        public async Task<bool> RemoveConfig(string dataId, string group)
-            => await RemoveConfigInner(_namespace, dataId, group, null).ConfigureAwait(false);
+        public Task<bool> RemoveConfig(string dataId, string group)
+            => RemoveConfigInner(_namespace, dataId, group, null);
 
         public Task RemoveListener(string dataId, string group, IListener listener)
             => _worker.RemoveTenantListener(dataId, group, listener);
@@ -140,7 +140,7 @@
             return content;
         }
 
-        private async Task<bool> PublishConfigInner(string tenant, string dataId, string group, string tag, string appName, string betaIps, string content, string type, string casMd5)
+        private Task<bool> PublishConfigInner(string tenant, string dataId, string group, string tag, string appName, string betaIps, string content, string type, string casMd5)
         {
             group = ParamUtils.Null2DefaultGroup(group);
             ParamUtils.CheckParam(dataId, group, content);
@@ -155,14 +155,14 @@
             content = cr.GetContent();
             string encryptedDataKey = (string)(cr.GetParameter(ConfigConstants.ENCRYPTED_DATA_KEY) ?? string.Empty);
 
-            return await _worker.PublishConfig(dataId, group, tenant, appName, tag, betaIps, content, encryptedDataKey, casMd5, type).ConfigureAwait(false);
+            return _worker.PublishConfig(dataId, group, tenant, appName, tag, betaIps, content, encryptedDataKey, casMd5, type);
         }
 
-        private async Task<bool> RemoveConfigInner(string tenant, string dataId, string group, string tag)
+        private Task<bool> RemoveConfigInner(string tenant, string dataId, string group, string tag)
         {
             group = ParamUtils.Null2DefaultGroup(group);
             ParamUtils.CheckKeyParam(dataId, group);
-            return await _worker.RemoveConfig(dataId, group, tenant, tag).ConfigureAwait(false);
+            return _worker.RemoveConfig(dataId, group, tenant, tag);
         }
     }
 }

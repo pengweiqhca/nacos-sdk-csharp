@@ -73,12 +73,12 @@
 
         public Task<bool> DeleteService(string serviceName, string groupName) => Task.FromResult(false);
 
-        public async Task DeregisterService(string serviceName, string groupName, Instance instance)
+        public Task DeregisterService(string serviceName, string groupName, Instance instance)
         {
             _logger?.LogInformation("[DEREGISTER-SERVICE] {0} deregistering service {1} with instance {2}", namespaceId, serviceName, instance);
 
             _redoService.InstanceDeregister(serviceName, groupName);
-            await DoDeregisterService(serviceName, groupName, instance).ConfigureAwait(false);
+            return DoDeregisterService(serviceName, groupName, instance);
         }
 
         public async Task DoDeregisterService(string serviceName, string groupName, Instance instance)
@@ -115,18 +115,18 @@
 
         public Task<Service> QueryService(string serviceName, string groupName) => Task.FromResult<Service>(null);
 
-        public async Task RegisterServiceAsync(string serviceName, string groupName, Instance instance)
+        public Task RegisterServiceAsync(string serviceName, string groupName, Instance instance)
         {
             _logger?.LogInformation("[REGISTER-SERVICE] {0} registering service {1} with instance {2}", namespaceId, serviceName, instance);
 
             _redoService.CacheInstanceForRedo(serviceName, groupName, instance);
-            await DoRegisterService(serviceName, groupName, instance).ConfigureAwait(false);
+            return DoRegisterService(serviceName, groupName, instance);
         }
 
-        public async Task BatchRegisterServiceAsync(string serviceName, string groupName, List<Instance> instances)
+        public Task BatchRegisterServiceAsync(string serviceName, string groupName, List<Instance> instances)
         {
             _redoService.CacheInstanceForRedo(serviceName, groupName, instances);
-            await DoBatchRegisterService(serviceName, groupName, instances).ConfigureAwait(false);
+            return DoBatchRegisterService(serviceName, groupName, instances);
         }
 
         private async Task DoBatchRegisterService(string serviceName, string groupName, List<Instance> instances)
@@ -145,11 +145,11 @@
 
         public bool ServerHealthy() => rpcClient.IsRunning();
 
-        public async Task<ServiceInfo> Subscribe(string serviceName, string groupName, string clusters)
+        public Task<ServiceInfo> Subscribe(string serviceName, string groupName, string clusters)
         {
             _logger?.LogDebug("[GRPC-SUBSCRIBE] service:{0}, group:{1}, cluster:{2} ", serviceName, groupName, clusters);
             _redoService.CacheSubscriberForRedo(serviceName, groupName, clusters);
-            return await DoSubscribe(serviceName, groupName, clusters).ConfigureAwait(false);
+            return DoSubscribe(serviceName, groupName, clusters);
         }
 
         public async Task<ServiceInfo> DoSubscribe(string serviceName, string groupName, string clusters)
@@ -160,11 +160,11 @@
             return response.ServiceInfo;
         }
 
-        public async Task Unsubscribe(string serviceName, string groupName, string clusters)
+        public Task Unsubscribe(string serviceName, string groupName, string clusters)
         {
             _logger?.LogDebug("[GRPC-UNSUBSCRIBE] service:{0}, group:{1}, cluster:{2} ", serviceName, groupName, clusters);
             _redoService.SubscriberDeregister(serviceName, groupName, clusters);
-            await DoUnsubscribe(serviceName, groupName, clusters).ConfigureAwait(false);
+            return DoUnsubscribe(serviceName, groupName, clusters);
         }
 
         public async Task DoUnsubscribe(string serviceName, string groupName, string clusters)

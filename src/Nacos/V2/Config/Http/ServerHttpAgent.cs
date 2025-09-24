@@ -35,14 +35,14 @@
 
         public string GetTenant() => _serverListMgr.GetTenant();
 
-        public async Task<HttpResponseMessage> HttpDelete(string path, Dictionary<string, string> headers, Dictionary<string, string> paramValues, string encoding, long readTimeoutMs)
-            => await HttpRequest(path, headers, paramValues, encoding, readTimeoutMs, HttpMethod.Delete).ConfigureAwait(false);
+        public Task<HttpResponseMessage> HttpDelete(string path, Dictionary<string, string> headers, Dictionary<string, string> paramValues, string encoding, long readTimeoutMs)
+            => HttpRequest(path, headers, paramValues, encoding, readTimeoutMs, HttpMethod.Delete);
 
-        public async Task<HttpResponseMessage> HttpGet(string path, Dictionary<string, string> headers, Dictionary<string, string> paramValues, string encoding, long readTimeoutMs)
-            => await HttpRequest(path, headers, paramValues, encoding, readTimeoutMs, HttpMethod.Get).ConfigureAwait(false);
+        public Task<HttpResponseMessage> HttpGet(string path, Dictionary<string, string> headers, Dictionary<string, string> paramValues, string encoding, long readTimeoutMs)
+            => HttpRequest(path, headers, paramValues, encoding, readTimeoutMs, HttpMethod.Get);
 
-        public async Task<HttpResponseMessage> HttpPost(string path, Dictionary<string, string> headers, Dictionary<string, string> paramValues, string encoding, long readTimeoutMs)
-            => await HttpRequest(path, headers, paramValues, encoding, readTimeoutMs, HttpMethod.Post).ConfigureAwait(false);
+        public Task<HttpResponseMessage> HttpPost(string path, Dictionary<string, string> headers, Dictionary<string, string> paramValues, string encoding, long readTimeoutMs)
+            => HttpRequest(path, headers, paramValues, encoding, readTimeoutMs, HttpMethod.Post);
 
         public async Task<HttpResponseMessage> HttpRequest(string path, Dictionary<string, string> headers, Dictionary<string, string> paramValues, string encoding, long readTimeoutMs, HttpMethod method)
         {

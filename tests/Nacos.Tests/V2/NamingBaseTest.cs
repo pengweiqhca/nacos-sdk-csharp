@@ -14,13 +14,13 @@
         protected ITestOutputHelper _output;
 
         [Fact]
-        protected virtual async Task RegisterInstance_Should_Succeed()
+        protected virtual Task RegisterInstance_Should_Succeed()
         {
             var serviceName = $"reg-{Guid.NewGuid().ToString()}";
             var ip = "127.0.0.1";
             var port = 9999;
 
-            await AssertRegisterSingleInstance(serviceName, ip, port, nameof(RegisterInstance_Should_Succeed)).ConfigureAwait(false);
+            return AssertRegisterSingleInstance(serviceName, ip, port, nameof(RegisterInstance_Should_Succeed));
         }
 
         [Fact]

@@ -90,14 +90,14 @@
             return Task.CompletedTask;
         }
 
-        private async Task<ConfigResponse> GetServerConfig(string dataId, string group, string tenant, long readTimeout, bool notify)
+        private Task<ConfigResponse> GetServerConfig(string dataId, string group, string tenant, long readTimeout, bool notify)
         {
             if (group.IsNullOrWhiteSpace()) group = Constants.DEFAULT_GROUP;
 
-            return await QueryConfig(dataId, group, tenant, readTimeout, notify).ConfigureAwait(false);
+            return QueryConfig(dataId, group, tenant, readTimeout, notify);
         }
 
-        private async Task<List<string>> CheckUpdateDataIds(List<CacheData> cacheDatas, List<string> inInitializingCacheList)
+        private Task<List<string>> CheckUpdateDataIds(List<CacheData> cacheDatas, List<string> inInitializingCacheList)
         {
             StringBuilder sb = new StringBuilder();
             foreach (CacheData cacheData in cacheDatas)
@@ -126,7 +126,7 @@
             }
 
             var isInitializingCacheList = inInitializingCacheList != null && inInitializingCacheList.Any();
-            return await CheckUpdateConfigStr(sb.ToString(), isInitializingCacheList).ConfigureAwait(false);
+            return CheckUpdateConfigStr(sb.ToString(), isInitializingCacheList);
         }
 
         private async Task<List<string>> CheckUpdateConfigStr(string probeUpdateString, bool isInitializingCacheList)
@@ -388,28 +388,28 @@
             }
         }
 
-        private async Task<HttpResponseMessage> HttpPost(string path, Dictionary<string, string> headers, Dictionary<string, string> paramValues, string encoding, long readTimeoutMs)
+        private Task<HttpResponseMessage> HttpPost(string path, Dictionary<string, string> headers, Dictionary<string, string> paramValues, string encoding, long readTimeoutMs)
         {
             if (headers == null) headers = new Dictionary<string, string>(16);
 
             AssembleHttpParams(paramValues, headers);
-            return await _agent.HttpPost(path, headers, paramValues, encoding, readTimeoutMs).ConfigureAwait(false);
+            return _agent.HttpPost(path, headers, paramValues, encoding, readTimeoutMs);
         }
 
-        private async Task<HttpResponseMessage> HttpGet(string path, Dictionary<string, string> headers, Dictionary<string, string> paramValues, string encoding, long readTimeoutMs)
+        private Task<HttpResponseMessage> HttpGet(string path, Dictionary<string, string> headers, Dictionary<string, string> paramValues, string encoding, long readTimeoutMs)
         {
             if (headers == null) headers = new Dictionary<string, string>(16);
 
             AssembleHttpParams(paramValues, headers);
-            return await _agent.HttpGet(path, headers, paramValues, encoding, readTimeoutMs).ConfigureAwait(false);
+            return _agent.HttpGet(path, headers, paramValues, encoding, readTimeoutMs);
         }
 
-        private async Task<HttpResponseMessage> HttpDelete(string path, Dictionary<string, string> headers, Dictionary<string, string> paramValues, string encoding, long readTimeoutMs)
+        private Task<HttpResponseMessage> HttpDelete(string path, Dictionary<string, string> headers, Dictionary<string, string> paramValues, string encoding, long readTimeoutMs)
         {
             if (headers == null) headers = new Dictionary<string, string>(16);
 
             AssembleHttpParams(paramValues, headers);
-            return await _agent.HttpDelete(path, headers, paramValues, encoding, readTimeoutMs).ConfigureAwait(false);
+            return _agent.HttpDelete(path, headers, paramValues, encoding, readTimeoutMs);
         }
 
         private void AssembleHttpParams(Dictionary<string, string> paramValues, Dictionary<string, string> headers)

@@ -269,12 +269,12 @@
             return labels;
         }
 
-        private async Task<CommonResponse> RequestProxy(RpcClient rpcClientInner, CommonRequest request, long timeout = 3000L)
+        private Task<CommonResponse> RequestProxy(RpcClient rpcClientInner, CommonRequest request, long timeout = 3000L)
         {
             BuildRequestHeader(request);
 
             // TODO: 1. limiter
-            return await rpcClientInner.Request(request, timeout).ConfigureAwait(false);
+            return rpcClientInner.Request(request, timeout);
         }
 
         private void BuildRequestHeader(CommonRequest request)
@@ -483,11 +483,11 @@
             }
         }
 
-        public async Task<ConfigResponse> GetServerConfig(string dataId, string group, string tenant, long readTimeout, bool notify)
+        public Task<ConfigResponse> GetServerConfig(string dataId, string group, string tenant, long readTimeout, bool notify)
         {
             if (group.IsNullOrWhiteSpace()) group = Constants.DEFAULT_GROUP;
 
-            return await QueryConfig(dataId, group, tenant, readTimeout, notify).ConfigureAwait(false);
+            return QueryConfig(dataId, group, tenant, readTimeout, notify);
         }
 
         private void RemoveCache(string dataId, string group, string tenant)

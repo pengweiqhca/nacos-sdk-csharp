@@ -140,12 +140,12 @@
             _logger?.LogInformation("[{0}] [unsubscribe] {1}", this._agent.GetName(), groupKey);
         }
 
-        public async Task<bool> RemoveConfig(string dataId, string group, string tenant, string tag)
-            => await _agent.RemoveConfigAsync(dataId, group, tenant, tag).ConfigureAwait(false);
+        public Task<bool> RemoveConfig(string dataId, string group, string tenant, string tag)
+            => _agent.RemoveConfigAsync(dataId, group, tenant, tag);
 
-        public async Task<bool> PublishConfig(string dataId, string group, string tenant, string appName, string tag, string betaIps,
+        public Task<bool> PublishConfig(string dataId, string group, string tenant, string appName, string tag, string betaIps,
             string content, string encryptedDataKey, string casMd5, string type)
-            => await _agent.PublishConfigAsync(dataId, group, tenant, appName, tag, betaIps, content, encryptedDataKey, casMd5, type).ConfigureAwait(false);
+            => _agent.PublishConfigAsync(dataId, group, tenant, appName, tag, betaIps, content, encryptedDataKey, casMd5, type);
 
         public Task<ConfigResponse> GetServerConfig(string dataId, string group, string tenant, long readTimeout, bool notify)
         {

@@ -103,7 +103,7 @@
             }
         }
 
-        public async Task CreateService(Service service, AbstractSelector selector)
+        public Task CreateService(Service service, AbstractSelector selector)
         {
             _logger?.LogInformation("[CREATE-SERVICE] {0} creating service : {1} ", namespaceId, service);
 
@@ -117,7 +117,7 @@
                 { CommonParams.SELECTOR_PARAM, selector.ToJsonString() },
             };
 
-            await ReqApi(UtilAndComs.NacosUrlService, paramters, HttpMethod.Post).ConfigureAwait(false);
+            return ReqApi(UtilAndComs.NacosUrlService, paramters, HttpMethod.Post);
         }
 
         public async Task<bool> DeleteService(string serviceName, string groupName)
@@ -135,7 +135,7 @@
             return "ok".Equals(result);
         }
 
-        public async Task DeregisterService(string serviceName, string groupName, Instance instance)
+        public Task DeregisterService(string serviceName, string groupName, Instance instance)
         {
             _logger?.LogInformation("[REGISTER-SERVICE] {0} deregistering service {1} with instance: {2}", namespaceId, serviceName, instance);
 
@@ -157,7 +157,7 @@
                 { CommonParams.EPHEMERAL_PARAM, instance.Ephemeral.ToString() },
             };
 
-            await ReqApi(UtilAndComs.NacosUrlInstance, paramters, HttpMethod.Delete).ConfigureAwait(false);
+            return ReqApi(UtilAndComs.NacosUrlInstance, paramters, HttpMethod.Delete);
         }
 
         public async Task<ListView<string>> GetServiceList(int pageNo, int pageSize, string groupName, AbstractSelector selector)
@@ -223,7 +223,7 @@
             return result.ToObj<Service>();
         }
 
-        public async Task RegisterServiceAsync(string serviceName, string groupName, Instance instance)
+        public Task RegisterServiceAsync(string serviceName, string groupName, Instance instance)
         {
             _logger?.LogInformation("[REGISTER-SERVICE] {0} registering service {1} with instance: {2}", namespaceId, serviceName, instance);
 
@@ -249,14 +249,14 @@
                 { CommonParams.META_PARAM, instance.Metadata.ToJsonString() },
             };
 
-            await ReqApi(UtilAndComs.NacosUrlInstance, paramters, HttpMethod.Post).ConfigureAwait(false);
+            return ReqApi(UtilAndComs.NacosUrlInstance, paramters, HttpMethod.Post);
         }
 
-        private async Task<string> ReqApi(string url, Dictionary<string, string> paramters, HttpMethod method)
-            => await ReqApi(url, paramters, new Dictionary<string, string>(), method).ConfigureAwait(false);
+        private Task<string> ReqApi(string url, Dictionary<string, string> paramters, HttpMethod method)
+            => ReqApi(url, paramters, new Dictionary<string, string>(), method);
 
-        private async Task<string> ReqApi(string url, Dictionary<string, string> paramters, Dictionary<string, string> body, HttpMethod method)
-            => await ReqApi(url, paramters, body, serverListManager.GetServerList(), method).ConfigureAwait(false);
+        private Task<string> ReqApi(string url, Dictionary<string, string> paramters, Dictionary<string, string> body, HttpMethod method)
+            => ReqApi(url, paramters, body, serverListManager.GetServerList(), method);
 
         private async Task<string> ReqApi(string url, Dictionary<string, string> paramters, Dictionary<string, string> body, List<string> servers, HttpMethod method)
         {
@@ -422,9 +422,9 @@
             }
         }
 
-        public async Task<ServiceInfo> Subscribe(string serviceName, string groupName, string clusters)
+        public Task<ServiceInfo> Subscribe(string serviceName, string groupName, string clusters)
         {
-            return await QueryInstancesOfService(serviceName, groupName, clusters, pushReceiver.GetUdpPort(), false).ConfigureAwait(false);
+            return QueryInstancesOfService(serviceName, groupName, clusters, pushReceiver.GetUdpPort(), false);
         }
 
         public Task Unsubscribe(string serviceName, string groupName, string clusters)
@@ -448,7 +448,7 @@
             return Task.CompletedTask;
         }
 
-        public async Task UpdateInstance(string serviceName, string groupName, Instance instance)
+        public Task UpdateInstance(string serviceName, string groupName, Instance instance)
         {
             _logger?.LogInformation("[UPDATE-SERVICE] {0} update service {1} with instance: {2}", namespaceId, serviceName, instance);
 
@@ -466,10 +466,10 @@
                 { CommonParams.META_PARAM, instance.Metadata.ToJsonString() },
             };
 
-            await ReqApi(UtilAndComs.NacosUrlInstance, paramters, HttpMethod.Put).ConfigureAwait(false);
+            return ReqApi(UtilAndComs.NacosUrlInstance, paramters, HttpMethod.Put);
         }
 
-        public async Task UpdateService(Service service, AbstractSelector selector)
+        public Task UpdateService(Service service, AbstractSelector selector)
         {
             _logger?.LogInformation("[UPDATE-SERVICE] {0} updating service : {1} ", namespaceId, service);
 
@@ -483,7 +483,7 @@
                 { CommonParams.SELECTOR_PARAM, selector.ToJsonString() },
             };
 
-            await ReqApi(UtilAndComs.NacosUrlService, paramters, HttpMethod.Put).ConfigureAwait(false);
+            return ReqApi(UtilAndComs.NacosUrlService, paramters, HttpMethod.Put);
         }
 
         private string InitParams(Dictionary<string, string> dict, Dictionary<string, string> body)
